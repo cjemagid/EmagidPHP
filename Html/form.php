@@ -42,16 +42,22 @@ class Form {
 
 	}
 
-	function datePickerFor($field_name, $htmlObjects = []){
+	function checkBoxFor($field_name, $htmlObjects = []){
 		if(!isset($htmlObjects['type']))
 		{
-			$htmlObjects['type'] = 'text';	
+			$htmlObjects['type'] = 'checkbox';	
 		}
 
-		$html = sprintf("<input id=\"datepicker\" name=\"%s\"", $field_name);
+		$html = sprintf("<input name=\"%s\"", $field_name);
 
 		foreach($htmlObjects as $key=>$val){
-			$html.=sprintf(" %s=\"%s\"", $key,$val);
+			
+			if(isset($this->model->{$field_name})){
+				$selected = $this->model->{$field_name} == $val?"checked=\"checked\"":"";
+				$html.=sprintf(" %s=\"%s\" %s" , $key,$val,$selected);
+			} else {
+				$html.=sprintf(" %s=\"%s\"" , $key,$val);
+			}
 		}
 
 		if(isset($this->model->{$field_name})){
@@ -65,15 +71,16 @@ class Form {
 
 	}
 
-
 	function textAreaFor($field_name, $htmlObjects = []){
 		
 
-		$html = sprintf("<textarea class=\"ckeditor\" name=\"%s\"", $field_name);
+		$html = sprintf("<textarea name=\"%s\"", $field_name);
 
 		foreach($htmlObjects as $key=>$val){
 			$html.=sprintf(" %s=\"%s\"", $key,$val);
 		}
+
+
 
 
 		$html.=">";
@@ -120,7 +127,7 @@ class Form {
 
 		if(array_keys($options) !== range(0, count($options) - 1)){ // the array is associative 
 			foreach($options as $key=>$value){
-				echo("<h1>$key=$value</h1>");
+
 				$selected = $key == $val?"selected=\"selected\"":"";
 
 				$html.= sprintf("<option value=\"%s\" %s>%s</option>",$key,$selected, $value);
@@ -132,8 +139,8 @@ class Form {
 
 				$key = $optionValue->{$kfield};
 				$value = $optionValue->{$vfield};
-
-				$selected = $value == $val?"selected=\"selected\"":"";
+				
+				$selected = $key == $val?"selected=\"selected\"":"";
 
 				$html.= sprintf("<option value=\"%s\" %s>%s</option>",$key,$selected, $value);
 			}

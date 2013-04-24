@@ -156,6 +156,8 @@ abstract class Db{
 			foreach($arr as $key => $val){
 				$this->{$key}=$val;
 			}
+
+			$this->loadRelationShips($this);
 		}
 
 		return $this;
@@ -175,7 +177,7 @@ abstract class Db{
 	* Insert / Update the current record 
 	*/
 	function save(){
-	  $db=$this->db; ; 
+	  $db = $this->getConnection();
 		
 		
 		$vals = object_to_array($this);
@@ -191,6 +193,7 @@ abstract class Db{
 		
 		// build both insert and update arrays
 		foreach($this->fields as $fld){
+			
 			$val = $db->escape($vals[$fld]);
 			$val = is_numeric($val)?$val:sprintf("'%s'", $val);
 			
