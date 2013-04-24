@@ -135,26 +135,37 @@ abstract class Db{
 		$row = $db->get_row($sql);;
 
 
-		// assign the values to the current object. 
-		// required for the update/insert functionality .
-		$arr = $this->object_to_array($row);
-		
-		foreach($arr as $key => $val){
-			$this->{$key}=$val;
+		if(count($row)>0){
+			// assign the values to the current object. 
+			// required for the update/insert functionality .
+			$arr = $this->object_to_array($row);
+			
+			foreach($arr as $key => $val){
+				$this->{$key}=$val;
+			}
 		}
 
 		return $this;
 	}
 
+	/**
+	* Delete the current record 
+	*/
+	function delete($id){
+
+		$db = $this->getConnection();
+		$sql = "DELETE FROM $this->table_name WHERE $this->fld_id=".$id;
+		$db->query($sql);
+	}
 
 	/**
 	* Insert / Update the current record 
 	*/
 	function save(){
-		global $db ; 
+	  $db=$this->db; ; 
 		
 		
-		$vals = object_to_array($this);
+		$vals = $this->object_to_array($this);
 		
 		// array used for update 
 		$update = array(); 
