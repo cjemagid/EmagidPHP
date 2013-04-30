@@ -47,7 +47,7 @@ class Emagid{
 		$this->loadLibraries($this->base_path.'libs/Emagid', false);
 
 		if($this->debug){ // load kint for debugging 
-			require_once($_SERVER['DOCUMENT_ROOT'].$this->base_path.'libs/Emagid/_includes/kint/Kint.class.php');
+			require_once($this->base_path.'libs/Emagid/_includes/kint/Kint.class.php');
 		}
 		
 
@@ -119,15 +119,15 @@ class Emagid{
 	* Load the eMagid libraries 
 	*/
 	function loadLibraries($folder , $loadFiles = true){
-
-		if ($handle = opendir($_SERVER["DOCUMENT_ROOT"].$folder)) {
+            
+		if ($handle = opendir($folder)) {
 		    /* Loop through directories  */
 		    while (false !== ($entry = readdir($handle))) {
 		    	if(!startsWith($entry,'.') && !startsWith($entry,'_')){ // skip git folders, up folder,etc... 
 		    	
 			    	if(stristr($entry,".php") ){
 			    		if($loadFiles){ // load all files in the current directory
-			    			require_once($_SERVER['DOCUMENT_ROOT'].$folder."/".$entry);
+			    			require_once($folder."/".$entry);
 			    		}
 			    	} else { // it's a folder
 			    			$this->loadLibraries($folder."/".$entry); // recursion 

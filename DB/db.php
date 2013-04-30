@@ -233,9 +233,19 @@ abstract class Db{
 			}
 		
 	}
+        /**
+         * get the number of elements in a table
+         * @return int  number
+         */
+        function getCount(){
+            $db = $this->getConnection(); 
 
-
-
+            $sql = "SELECT COUNT(*) FROM $this->table_name";
+    
+            return $db->get_var($sql);
+        }
+        
+     
 	/**
 	* load the form fields into the object after submit using POST.
 	*/
