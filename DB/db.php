@@ -248,7 +248,7 @@ abstract class Db{
 		}
 		
 		
-		
+
 		if($db->query($sql)){
 				return true;
 			}else{
@@ -306,7 +306,7 @@ abstract class Db{
 
 					if($relationship['relationship_type']=='many'){
 						$key = $relationship['remote']; 
-
+						
 						$obj = $obj->getList([
 								'where' => [
 									 $key => $local_val
