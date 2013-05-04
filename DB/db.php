@@ -74,9 +74,17 @@ abstract class Db{
 
 
 
-	/**
+/**
 	* get list from a table
 	* @param $params Array - conditions 
+	*		 $params = array(
+	*						"sql" => sql statement //If this param is set, all other params would be DISABLED
+	*						"where" => array(field_name => handle, field_name => handle) //where condition for "=" and "AND"  only, NO "OR", "LIKE" or anyothers 
+	*						"orderBy" => field_name 
+	*						"sort" => ASC or DESC 
+	*						"limit" => 10 //number
+	*						"offset" => 10 //number
+	*						);
 	* @return Array array of objects from the db table.
 	*/
 	function getList($params = array()){
@@ -84,17 +92,33 @@ abstract class Db{
 		$db = $this->getConnection(); 
 
 		
-
-		$sql = "SELECT * FROM $this->table_name";
-
-		if(isset($params['where'])){ // apply where conditions
-			$sql.=" WHERE ". $this->buildWhere($params['where']);
-		}
-
-		if(isset($params['limit'])){
-			$sql.= " LIMIT ".$params['limit'];
-		}
-
+	if(isset($params['sql'])){
+			//if sql is set, just execute it without apply any other params
+			$sql = $params['sql'];
+	
+	}else{
+			$sql = "SELECT * FROM $this->table_name";
+	
+			// apply where conditions
+			if(isset($params['where'])){ // apply where conditions
+				$sql.=" WHERE ". $this->buildWhere($params['where']);
+			}
+			
+			// apply order and sort
+			isset($params['orderBy'])? $orderBy = $params['orderBy'] : $orderBy = "id";
+			isset($params['sort'])? $sort = $params['sort'] : $sort = "ASC";
+			$sql.= " ORDER BY {$orderBy} {$sort}";
+			
+			// apply pagination
+			if(isset($params['limit'])){
+				$sql.= " LIMIT ".$params['limit'];
+			}
+			
+			if(isset($params['offset'])){
+				$sql.= " OFFSET ".$params['offset'];
+			}
+	}//close construct sql
+	
 		 $dbList = $db->get_results($sql); 
 
 			$list = [] ;
