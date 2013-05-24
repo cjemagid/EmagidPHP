@@ -228,5 +228,41 @@ class Form {
 		
 	}
 
+
+
+
+	/** 
+	* Server side validation
+	* @return object result of server side validation
+	*			- $is_valid bool - true/false 
+	*			- $errors array  - assoc array of errors
+	*/
+	public function isValid() {
+		$obj = new \stdClass;
+
+		$obj->is_valid = true; 
+		$obj->errors   = [];
+
+		foreach ($this->model->fields as $key=>$val) {
+			$fld_value = $this->model->{$key}; 
+
+			
+
+
+			if($val['required'] && !$fld_value ){
+				$obj->is_valid  = false;
+				$obj->errors[]  = $key.' is required ' ; 
+			}
+				
+		}
+		
+
+
+
+
+		return $obj;
+
+	}
+
 }
 ?>
