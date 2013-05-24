@@ -202,6 +202,9 @@ class Form {
 
 	 	$fld=$this->model->fields[$field_name];
 
+	 	if(!isset($fld['type']))
+	 		$fld['type'] = 'text';
+
 	 	switch($fld['type']){
 	 		case 'textarea': 
 	 			return $this->textAreaFor($field_name, $htmlObjects);

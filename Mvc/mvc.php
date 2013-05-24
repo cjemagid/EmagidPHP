@@ -151,10 +151,19 @@ class Mvc{
 		$emagid->controller->name = $controller_name; 
 		$emagid->controller->view = $view_name; 
 
-		call_user_func_array(array(&$emagid->controller, $view_name),$segments);
+
+		$req = strtolower($_SERVER['REQUEST_METHOD']); 
+
+		$method = $view_name.'_'.$req; 
+
+		if(method_exists($emagid->controller, $method)){
+			call_user_func_array(array(&$emagid->controller, $method),$segments);
+		}else 
+			call_user_func_array(array(&$emagid->controller, $view_name),$segments);
 		
 
 	}
+	
 
 
 	/**
