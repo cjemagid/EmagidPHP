@@ -246,12 +246,30 @@ class Form {
 		foreach ($this->model->fields as $key=>$val) {
 			$fld_value = $this->model->{$key}; 
 
-			
-
-
-			if($val['required'] && !$fld_value ){
+			if(isset($val['required']) && $val['required'] && !$fld_value ){
 				$obj->is_valid  = false;
 				$obj->errors[]  = $key.' is required ' ; 
+
+			}
+
+
+
+			if(isset($val['unique']) && $val['unique']){
+
+				$count = $this->model->getCount([
+						'where' => [
+							$key => $fld_value
+						] 
+					]);
+
+				if($count){
+					$obj->is_valid  = false;
+					$obj->errors[]  = $fld_value.' is already taken' ; 
+				}
+
+
+				
+
 			}
 				
 		}
@@ -263,6 +281,22 @@ class Form {
 		return $obj;
 
 	}
+
+	/**
+	* Validate the form and save the object .
+	*
+	*  @return Object - returns the validation object, if isvalid == false it means that the submission failed.
+	*/
+	function submit() {
+		$valid = $this->isValid() ;
+
+		if($valid->is_valid){
+
+			$this->model->save();
+		}
+
+		return $valid;
+	} 
 
 }
 ?>

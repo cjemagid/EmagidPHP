@@ -276,12 +276,22 @@ abstract class Db{
 		
 		
 		// build both insert and update arrays
-		foreach($this->fields as $fld){
+		foreach($this->fields as $key => $value ){
+
+			if(is_numeric($key))
+			{
+				$fld = $value; 
+			}else{
+				$fld = $key;
+			}
 			
-			$val = $db->escape($vals[$fld]);
-			$val = is_numeric($val)?$val:sprintf("'%s'", $val);
-			
-			
+			if(isset($fld)   && $fld){
+				$val = $db->escape($vals[$fld]);
+				$val = is_numeric($val)?$val:sprintf("'%s'", $val);
+			}else{
+
+			}
+
 			array_push($update , sprintf("%s=%s", $fld, $val));
 			array_push($insert_names, $fld);
 			array_push($insert_vals, sprintf("%s", $val));	
