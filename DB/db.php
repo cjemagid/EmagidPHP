@@ -66,11 +66,14 @@ abstract class Db{
 			require_once("ez_sql_core.php");
 			require_once("ez_sql_mysql.php");
 
+
+
 			$this->db = new \ezSQL_mysql(
 				$emagid->connection_string->username, 
 				$emagid->connection_string->password,  // pwd
 				$emagid->connection_string->db_name,  // dbname 
 				$emagid->connection_string->host);
+
 		}
 
 		return $this->db;
@@ -138,7 +141,8 @@ abstract class Db{
 			isset($params['orderBy'])? $orderBy = $params['orderBy'] : $orderBy = $this->fld_id." DESC";
 			
 			$sql.= " ORDER BY {$orderBy}";
-			
+
+
 			// apply pagination
 			if(isset($params['limit'])){
 				$sql.= " LIMIT ".$params['limit'];
@@ -176,13 +180,18 @@ abstract class Db{
 
 	function buildWhere($where){
 
-		$arr = [] ; 
+		if(is_array($where)){
 
-		foreach($where as $key=>$val ){
-			array_push($arr,sprintf("(%s='%s')", $key,$val));
+			$arr = [] ; 
+
+			foreach($where as $key=>$val ){
+				array_push($arr,sprintf("(%s='%s')", $key,$val));
+			}
+
+			return implode(" AND ", $arr);
+		} else {
+			return $where;
 		}
-
-		return implode(" AND ", $arr);
 	}
 
 
@@ -200,7 +209,7 @@ abstract class Db{
 
 		$sql = "SELECT * FROM $this->table_name WHERE $this->fld_id=".$id;
 
-		$row = $db->get_row($sql);;
+		$row = $db->get_row($sql);
 
 
 		if(count($row)>0){
@@ -351,7 +360,6 @@ abstract class Db{
 
 
 
-
 		foreach($this->relationships as $relationship){
 
 
@@ -366,6 +374,11 @@ abstract class Db{
 
 					$local_val = $this->{$relationship['local']};
 
+					if(!$local_val)
+					{
+						return null;
+					}
+
 
 					if($relationship['relationship_type']=='many'){
 						$key = $relationship['remote']; 
@@ -376,11 +389,15 @@ abstract class Db{
 								] 
 							]);
 					}else{
+
 						$obj->getItem($local_val);
 					}
 					
+
+
 					$this->data[$name] = $obj;
 					$this->{$name} = $obj;
+
 
 					return $obj; 
 

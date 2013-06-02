@@ -424,7 +424,7 @@
 				echo "<font face=arial size=2 color=000099><b>Last Error --</b> [<font color=000000><b>$this->last_error</b></font>]<p>";
 			}
 
-			if ( $this->from_disk_cache )
+			if ( isset($this->from_disk_cache) &&  $this->from_disk_cache )
 			{
 				echo "<font face=arial size=2 color=000099><b>Results retrieved from disk cache</b></font><p>";
 			}

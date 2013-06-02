@@ -58,7 +58,10 @@ class Mvc{
 
 		global $emagid; 
 
-		if($arr['template'])
+
+		$exclude_ext = ['.css' , '.jpg', '.html' ,'.js'];
+
+		if(isset($arr['template']) && $arr['template'])
 			$emagid->template=$arr['template'];
 
 		if(isset($arr['root']))
@@ -77,6 +80,8 @@ class Mvc{
 
 		$uri = $_SERVER['REQUEST_URI'];
 
+
+
 		if(stristr($uri, "?")){
 			$uri_parts = explode("?", $uri); 
 			$uri = $uri_parts[0];
@@ -88,15 +93,20 @@ class Mvc{
 
 
 		if(self::startsWith($uri, self::$root)){
-			$uri = substr($uri, strlen(self::$root)+1);
+			$uri = substr($uri, strlen(self::$root));
 		}
 
 		if(self::startsWith($uri, '/')){
 			$uri = substr($uri, 1);
 		}
 
+		foreach ($exclude_ext as $ext) {
+			if(stristr($uri, $ext)){
+				header("HTTP/1.0 404 Not Found");
+				die();
+			}
+		}
 
-		
 
 		$route_found = false; 
 
@@ -144,10 +154,18 @@ class Mvc{
 			}
 		}
 
+
+		$path = $emagid->base_path.'/controllers/'.$controller_name.'.php' ;
+
+		if(!file_exists($path))
+			return ;
+
 		// load the controller 
-		require_once($emagid->base_path.'/controllers/'.$controller_name.'.php');
+		require_once($path);
 
 
+
+		//$emagid->controller = new \stdClass ;
 		$emagid->controller->name = $controller_name; 
 		$emagid->controller->view = $view_name; 
 
@@ -160,6 +178,8 @@ class Mvc{
 			call_user_func_array(array(&$emagid->controller, $method),$segments);
 		}else 
 			call_user_func_array(array(&$emagid->controller, $view_name),$segments);
+
+		die();
 		
 
 	}

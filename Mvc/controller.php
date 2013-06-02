@@ -39,10 +39,11 @@ abstract class Controller{
 	/**
 	* load the view 
 	*
-	* @param string $view
-	*         name of view to load. default is the class's view
+	* @param string $view 	name of view to load. default is the class's view
+	* @param object $model 	object that contains all the data for the view.
+	*         
 	*/
-	protected function loadView($view = null ){
+	protected function loadView(string $view = null , $model = null ){
 		global $emagid ; 
 
 		if($view)
@@ -53,13 +54,13 @@ abstract class Controller{
 			include($path);
 		}else{
 
-			$this->renderBody();
+			$this->renderBody($model);
 		}
 
 	}
 
 
-	public function renderBody(){
+	public function renderBody($model = null){
 		global $emagid ; 
 
 		$path= $emagid->base_path.'/views/'.$this->name.'/'.$this->view.'.php';
