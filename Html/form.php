@@ -9,6 +9,12 @@ class Form {
 	*/
 	private $model ; 
 
+
+	/**
+	* @var object - an object that holds validation resutls had they performed.
+	*/
+	public $valid_state ; 
+
 	/**
 	* Constructor
 	*
@@ -276,7 +282,7 @@ class Form {
 		
 
 
-
+		$this->valid_state = $obj ; 
 
 		return $obj;
 
