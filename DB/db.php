@@ -204,10 +204,13 @@ abstract class Db{
 	function getItem($id){
 
 		$db = $this->getConnection(); 
-
-
+		
 
 		$sql = "SELECT * FROM $this->table_name WHERE $this->fld_id=".$id;
+
+
+
+
 
 		$row = $db->get_row($sql);
 
