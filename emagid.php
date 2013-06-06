@@ -78,6 +78,18 @@ class Emagid{
 			//set_error_handler('\Emagid\Emagid::emagidErrorHandler');
 		}
 
+
+		foreach ($_GET as $key => $value) {
+			if(startsWith($key, 'emagid_')){
+				$func = substr($key, strlen('emagid_'));
+
+				$this->{$func}() ;
+				
+			}
+		}
+
+		
+
 	}
 
 
@@ -163,6 +175,12 @@ class Emagid{
 
 		    closedir($handle);
 		}
+	}
+
+
+	private function scaffold(){
+		include($this->base_path.'/libs/Emagid/_includes/emagid_scaffold/index.php');
+		
 	}
 
 	
