@@ -20,7 +20,7 @@ abstract class Db{
 	/**
 	* @var string id field for table
 	*/	
-	protected $fld_id = "id";
+	public $fld_id = "id";
 
 	/**
 	* @var string table name 
@@ -86,6 +86,10 @@ abstract class Db{
 	*		 $params = array(
 	*						"where" => array(field_name => handle, field_name => handle) //where condition for "=" and "AND"  only, NO "OR", "LIKE" or anyothers 
 	*						);
+	*		OR
+	*		 $params = array(
+	*						"sql" => " WHERE field_name = handle AND field_name != handle" //get full power with where codition in string
+	*						);
 	* @return int number of records in the table 
 	*/
 	function getCount($params = array()){
@@ -98,9 +102,15 @@ abstract class Db{
 		if(isset($params['where'])){ // apply where conditions
 			$sql.=" WHERE ". $this->buildWhere($params['where']);
 		}
+
+		// apply sql conditions
+		if(isset($params['sql'])){ // apply where conditions
+			$sql.= $params['sql'];
+		}
 			
-		
+		//echo $sql; die();
 		return $db->get_var($sql);
+
 	}
 	
 
