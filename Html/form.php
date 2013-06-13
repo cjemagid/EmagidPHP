@@ -262,10 +262,9 @@ class Form {
 
 			if(isset($val['unique']) && $val['unique']){
 
-				$count = $this->model->getCount([
-						'where' => [
-							$key => $fld_value
-						] 
+				$where = " WHERE {$key} = '{$fld_value}' AND {$this->model->fld_id} != " . $this->model->id;
+					$count = $this->model->getCount([
+						'sql' => $where
 					]);
 
 				if($count){
