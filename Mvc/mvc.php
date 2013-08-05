@@ -158,7 +158,8 @@ class Mvc{
 		$path = $emagid->base_path.'/controllers/'.$controller_name.'.php' ;
 
 		// for windows server .
-		$path = str_replace ('/','\\', str_replace ('//','\\',$path));
+		if($emagid->windows_server)
+			$path = str_replace ('/','\\', str_replace ('//','\\',$path));
 
 		if(!file_exists($path))
 			return ;
