@@ -177,7 +177,6 @@ abstract class Db{
 	}
 
 
-
 	function buildWhere($where){
 
 		if(is_array($where)){
@@ -192,6 +191,24 @@ abstract class Db{
 		} else {
 			return $where;
 		}
+	}
+	
+	/**
+	* public function fieldIn
+	* @param (string) $field the field in which we are checking to see if there is an occurance of it in a list of options.
+	* @param (array) $options a list of options to check if there is an occurance of it within db
+	* @return results;
+	*/
+	
+	public function fieldIn($field, array $options){
+		$db = $this->getConnection(); 
+		$sql = "SELECT * FROM $this->table_name WHERE $field IN (";
+		$arr = array();
+		foreach($options as $k=>$option){
+			$arr[] = (is_numeric($option)?$option:"'$option'");
+		}
+		$sql.= implode(',',$arr).")"; 
+		return $db->get_results($sql); 
 	}
 
 
@@ -270,9 +287,14 @@ abstract class Db{
 	}
 
 	/**
-	* Insert / Update the current record 
+	* Insert / Update the current record
+	*
+	* args:
+	* $return_insert_id = false (boolean) 	- If set to true, successfully query will return the last successful insert ID instead of boolean. use ===/!== to determine success
+	* $set_insert_id = false (boolean) 		- If set to true, will set the current object's primary id as the last insert ID. This allows for an object to be inserted an updated within a single script.
+	*
 	*/
-	function save(){
+	function save($return_insert_id = false, $set_insert_id = false){
 	  $db = $this->getConnection();
 		
 		
@@ -325,11 +347,15 @@ abstract class Db{
 		
 
 		if($db->query($sql)){
-				return true;
-			}else{
-				die($sql . "<br/>" . mysql_error());
-				return false;
-			}
+			if($set_insert_id)
+				$this->id = $db->insert_id;
+			if($return_insert_id)
+				return $db->insert_id;
+			return true;
+		}else{
+			die($sql . "<br/>" . mysql_error());
+			return false;
+		}
 		
 	}
 
@@ -356,7 +382,7 @@ abstract class Db{
 
 
 	public function __get($name){
-
+		
 		// check if data was already created 
 		if(isset($this->data[$name]))
 			return $this->data[$name];
@@ -364,11 +390,11 @@ abstract class Db{
 
 
 		foreach($this->relationships as $relationship){
-
+			
 
 			if($relationship['name'] == $name){
-
-
+				echo 'test:' . $name;
+	
 				if(isset($relationship['class_name'])){ // creating a strong named object 
 
 					$class = $relationship['class_name'];
