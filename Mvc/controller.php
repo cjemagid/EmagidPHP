@@ -24,6 +24,12 @@ abstract class Controller{
 	* name of active view
 	*/
 	public $view = 'index';
+	
+	/**
+	* @var string 
+	* name of active area
+	*/
+	public $area = '';
 
 
 
@@ -63,7 +69,7 @@ abstract class Controller{
 	public function renderBody($model = null){
 		global $emagid ; 
 
-		$path= $emagid->base_path.'/views/'.$this->name.'/'.$this->view.'.php';
+		$path= $emagid->base_path.'/views/'.$this->area.$this->name.'/'.$this->view.'.php';
 
 
 

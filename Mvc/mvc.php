@@ -22,11 +22,6 @@ class Mvc{
 	*/
 	private static $root = '/'; 
 
-	/**
-	* @var string the default area when none specified
-	*/
-	private static $default_area = ''; 
-
 
 	/**
 	* @var string the default controller when none specified
@@ -39,6 +34,11 @@ class Mvc{
 	*/
 	private static $default_view = 'index'; 
 
+
+	/**
+	* @var string the default area when none specified
+	*/
+	private static $default_area = ''; 
 
 
 	/**
@@ -181,6 +181,7 @@ class Mvc{
 		//$emagid->controller = new \stdClass ;
 		$emagid->controller->name = $controller_name; 
 		$emagid->controller->view = $view_name; 
+		$emagid->controller->area = $area_name; 
 
 
 		$req = strtolower($_SERVER['REQUEST_METHOD']); 
