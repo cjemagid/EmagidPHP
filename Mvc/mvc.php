@@ -22,6 +22,11 @@ class Mvc{
 	*/
 	private static $root = '/'; 
 
+	/**
+	* @var string the default area when none specified
+	*/
+	private static $default_area = ''; 
+
 
 	/**
 	* @var string the default controller when none specified
@@ -80,7 +85,7 @@ class Mvc{
 
 		$uri = $_SERVER['REQUEST_URI'];
 
-
+		
 
 		if(stristr($uri, "?")){
 			$uri_parts = explode("?", $uri); 
@@ -118,8 +123,9 @@ class Mvc{
 					$segments = [];
 
 					$route_found = true; 
-
-					$controller_name = $route['controller'] ;
+					
+					$area_name = (isset($route['area'])?$route['area'] . '/':'');
+					$controller_name = $route['controller'];
 					$view_name = $route['action'];
 
 					break;
@@ -139,7 +145,7 @@ class Mvc{
 
 			$controller_name = self::getAndPop($segments) ; 
 
-
+			$area_name = self::$default_area;
 			if(!$controller_name ) {
 					// if controller doesn't exist, view won't exist neigther .
 					$controller_name = self::$default_controller ;
@@ -155,10 +161,11 @@ class Mvc{
 		}
 
 
-		$path = $emagid->base_path.'/controllers/'.$controller_name.'.php' ;
+		$path = $emagid->base_path.'/controllers/'.$area_name.$controller_name.'.php' ;
 
 		// for windows server .
-		$path = str_replace ('/','\\', str_replace ('//','\\',$path));
+		if($emagid->windows_server)
+			$path = str_replace ('/','\\', str_replace ('//','\\',$path));
 
 		if(!file_exists($path))
 			return ;

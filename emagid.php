@@ -23,7 +23,12 @@ class Emagid{
 	* @var String base path
 	*/ 
 	public $base_path = '/' ;
-
+	
+	/** 
+	* @var Boolean windows_server. Set as true if using a windows server, used for file pathing.
+	*/ 
+	public $windows_server = false;
+	
 	/**
 	* @var Array list of folders to include 
 	*/
