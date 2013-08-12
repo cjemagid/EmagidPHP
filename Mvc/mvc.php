@@ -35,6 +35,11 @@ class Mvc{
 	private static $default_view = 'index'; 
 
 
+	/**
+	* @var string the default area when none specified
+	*/
+	private static $default_area = ''; 
+
 
 	/**
 	* @var array - routing table allows the user to  add new "translators " for routes
@@ -80,7 +85,7 @@ class Mvc{
 
 		$uri = $_SERVER['REQUEST_URI'];
 
-
+		
 
 		if(stristr($uri, "?")){
 			$uri_parts = explode("?", $uri); 
@@ -112,16 +117,23 @@ class Mvc{
 
 		if(self::$routes && count(self::$routes)>0 ){
 			foreach (self::$routes as $route ) {
-
+				$segments = explode('/', $uri);
+				$uri = $segments[0] . (isset($segments[1])?'/' . $segments[1]:'');
+				//to allow routing to allow pathing to have method/view from url
+				if(isset($segments[2])) $fallback_method = $segments[2];
+				
 				if($uri == $route['pattern']){
 
 					$segments = [];
 
 					$route_found = true; 
-
-					$controller_name = $route['controller'] ;
+					
+					$area_name = (isset($route['area'])?$route['area'] . '/':'');
+					$controller_name = $route['controller'];
 					$view_name = $route['action'];
-
+					//use a fallback method based on the url
+					if($view_name == '')$view_name = $fallback_method;
+					
 					break;
 				}
 				
@@ -139,7 +151,7 @@ class Mvc{
 
 			$controller_name = self::getAndPop($segments) ; 
 
-
+			$area_name = self::$default_area;
 			if(!$controller_name ) {
 					// if controller doesn't exist, view won't exist neigther .
 					$controller_name = self::$default_controller ;
@@ -155,10 +167,11 @@ class Mvc{
 		}
 
 
-		$path = $emagid->base_path.'/controllers/'.$controller_name.'.php' ;
+		$path = $emagid->base_path.'/controllers/'.$area_name.$controller_name.'.php' ;
 
 		// for windows server .
-		$path = str_replace ('/','\\', str_replace ('//','\\',$path));
+		if($emagid->windows_server)
+			$path = str_replace ('/','\\', str_replace ('//','\\',$path));
 
 		if(!file_exists($path))
 			return ;
@@ -174,17 +187,21 @@ class Mvc{
 		//$emagid->controller = new \stdClass ;
 		$emagid->controller->name = $controller_name; 
 		$emagid->controller->view = $view_name; 
+		$emagid->controller->area = $area_name; 
 
 
 		$req = strtolower($_SERVER['REQUEST_METHOD']); 
 
 		$method = $view_name.'_'.$req; 
-
+		//currently dies with a revealed error to the user, or logs in php_error.log, instead setting an else
+		//to let the user know that the method is invalid
 		if(method_exists($emagid->controller, $method)){
 			call_user_func_array(array(&$emagid->controller, $method),$segments);
-		}else 
+		}else if(method_exists($emagid->controller, $view_name)){
 			call_user_func_array(array(&$emagid->controller, $view_name),$segments);
-
+		}else{
+			echo 'Invalid Method';
+		}
 		die();
 		
 
