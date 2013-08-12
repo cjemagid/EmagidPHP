@@ -257,6 +257,7 @@ abstract class Db{
 		$db = $this->getConnection();
 		$sql = "DELETE FROM $this->table_name WHERE $this->fld_id=".$id;
 		$db->query($sql);
+		return true;
 	}
 
 
