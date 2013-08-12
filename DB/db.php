@@ -394,8 +394,7 @@ abstract class Db{
 			
 
 			if($relationship['name'] == $name){
-				echo 'test:' . $name;
-	
+				
 				if(isset($relationship['class_name'])){ // creating a strong named object 
 
 					$class = $relationship['class_name'];
