@@ -341,7 +341,7 @@ abstract class Db{
 		}else {
 			$vals = implode(',', $update );
 			$sql = "UPDATE $this->table_name SET $vals";
-			$sql .= " WHERE id={$this->id}";
+			$sql .= " WHERE {$this->fld_id}={$this->id}";
 		}
 		
 		
