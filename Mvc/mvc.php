@@ -117,7 +117,11 @@ class Mvc{
 
 		if(self::$routes && count(self::$routes)>0 ){
 			foreach (self::$routes as $route ) {
-
+				$segments = explode('/', $uri);
+				$uri = $segments[0] . (isset($segments[1])?'/' . $segments[1]:'');
+				//to allow routing to allow pathing to have method/view from url
+				if(isset($segments[2])) $fallback_method = $segments[2];
+				
 				if($uri == $route['pattern']){
 
 					$segments = [];
@@ -127,7 +131,9 @@ class Mvc{
 					$area_name = (isset($route['area'])?$route['area'] . '/':'');
 					$controller_name = $route['controller'];
 					$view_name = $route['action'];
-
+					//use a fallback method based on the url
+					if($view_name == '')$view_name = $fallback_method;
+					
 					break;
 				}
 				
@@ -187,12 +193,15 @@ class Mvc{
 		$req = strtolower($_SERVER['REQUEST_METHOD']); 
 
 		$method = $view_name.'_'.$req; 
-
+		//currently dies with a revealed error to the user, or logs in php_error.log, instead setting an else
+		//to let the user know that the method is invalid
 		if(method_exists($emagid->controller, $method)){
 			call_user_func_array(array(&$emagid->controller, $method),$segments);
-		}else 
+		}else if(method_exists($emagid->controller, $view_name)){
 			call_user_func_array(array(&$emagid->controller, $view_name),$segments);
-
+		}else{
+			echo 'Invalid Method';
+		}
 		die();
 		
 
