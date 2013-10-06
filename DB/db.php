@@ -20,7 +20,7 @@ abstract class Db{
 	/**
 	* @var string id field for table
 	*/	
-	protected $fld_id = "id";
+	public $fld_id = "id";
 
 	/**
 	* @var string table name 
@@ -93,13 +93,14 @@ abstract class Db{
 		$db = $this->getConnection(); 
 
 		$sql = "SELECT count(*) FROM $this->table_name";
+
+
 	
 		// apply where conditions
 		if(isset($params['where'])){ // apply where conditions
 			$sql.=" WHERE ". $this->buildWhere($params['where']);
 		}
-			
-		
+
 		return $db->get_var($sql);
 	}
 	
@@ -208,10 +209,6 @@ abstract class Db{
 
 		$sql = "SELECT * FROM $this->table_name WHERE $this->fld_id=".$id;
 
-
-
-
-
 		$row = $db->get_row($sql);
 
 
@@ -289,17 +286,34 @@ abstract class Db{
 		
 		// build both insert and update arrays
 		foreach($this->fields as $key => $value ){
+			$null_if_empty = false; 
+
 
 			if(is_numeric($key))
 			{
 				$fld = $value; 
 			}else{
 				$fld = $key;
+
+				
+				$null_if_empty = isset($this->fields[$key]['null_if_empty'])  && $this->fields[$key]['null_if_empty'];
+				
 			}
 			
 			if(isset($fld)   && $fld){
-				$val = $db->escape($vals[$fld]);
-				$val = is_numeric($val)?$val:sprintf("'%s'", $val);
+
+
+				if(!isset($vals[$fld]))
+					continue;
+
+
+				if((!isset($vals[$fld]) || empty($vals[$fld])) && $null_if_empty){
+					$val = "NULL "; 
+				}
+				else {
+					$val = $db->escape($vals[$fld]);
+					$val = is_numeric($val)?$val:sprintf("'%s'", $val);
+				}
 			}else{
 
 			}
@@ -308,7 +322,6 @@ abstract class Db{
 			array_push($insert_names, $fld);
 			array_push($insert_vals, sprintf("%s", $val));	
 		}
-		
 		
 		// decide whether we need an INSERT or an UPDATE, and build the SQL query.
 		if($this->id == 0){
@@ -321,16 +334,29 @@ abstract class Db{
 			$sql = "UPDATE $this->table_name SET $vals";
 			$sql .= " WHERE id={$this->id}";
 		}
+
+
 		
 		
 
 		if($db->query($sql)){
+				if($this->id == 0 )
+				{
+					$this->id = $db->get_var("SELECT LAST_INSERT_ID() as id ");
+				}
+
 				return true;
-			}else{
-				die($sql . "<br/>" . mysql_error());
-				return false;
-			}
+		}else{
+			die($sql . "<br/>" . mysql_error());
+			return false;
+		}
 		
+	}
+
+	function query($sql){
+	  $db = $this->getConnection();
+
+	  $db->query($sql);
 	}
 
 
