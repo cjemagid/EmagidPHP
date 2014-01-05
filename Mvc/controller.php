@@ -50,7 +50,9 @@ abstract class Controller{
 			$this->view = $view; 
 
 		if($this->template){
-			$path= $emagid->base_path.'/templates/'.$this->template.'/'.$this->template.'.php';
+			$path = '/templates/'.$this->template.'/'.$this->template.'.php';
+			$path = (ROOT_PATH.str_replace('/', DIRECTORY_SEPARATOR, $path));
+
 			include($path);
 		}else{
 

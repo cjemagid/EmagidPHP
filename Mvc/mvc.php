@@ -155,26 +155,12 @@ class Mvc{
 		}
 
 
-		$path = $emagid->base_path.'/controllers/'.$controller_name.'.php' ;
-
-		// for windows server .
-		$path = str_replace ('/','\\', str_replace ('//','\\',$path));
-
-		if(!file_exists($path))
+		$controller_name = self::loadController($controller_name); 
+		if (!$controller_name)
 			return ;
 
 
-
-
-		// load the controller 
-		require_once($path);
-
-
-
-		//$emagid->controller = new \stdClass ;
-		$emagid->controller->name = $controller_name; 
-		$emagid->controller->view = $view_name; 
-
+		$emagid->controller = new $controller_name();
 
 		$req = strtolower($_SERVER['REQUEST_METHOD']); 
 
@@ -187,6 +173,38 @@ class Mvc{
 
 		die();
 		
+
+	}
+
+
+	private static function loadController($controller_name){
+		global $emagid; 
+
+		$paths = [
+			ROOT_PATH.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$controller_name.'.php', 
+			ROOT_PATH.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$controller_name.'Controller.php', 
+		];
+
+
+
+		foreach ($paths as $path) {
+			if(file_exists($path)) {
+				require_once($path);
+
+				if(class_exists($controller_name))
+					return $controller_name;
+
+				if(class_exists($controller_name .'Controller'))
+					return $controller_name .'Controller';
+
+			}
+
+
+			
+
+		}
+
+		return false;
 
 	}
 	
