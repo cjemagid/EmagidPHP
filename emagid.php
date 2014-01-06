@@ -6,6 +6,9 @@ if($_SERVER['DOCUMENT_ROOT'])
 
 require_once("functions.inc.php");
 require_once("hooks/__autoloader.php");
+
+spl_autoload_register(['\Emagid\AutoLoader', 'loadNamespace']);
+
 require_once("_emagid.php");
 
 

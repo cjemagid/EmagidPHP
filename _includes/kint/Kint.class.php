@@ -4,8 +4,6 @@
  *
  * https://github.com/raveren/kint
  */
-
-
 define( 'KINT_DIR', dirname( __FILE__ ) . '/' );
 require KINT_DIR . 'config.default.php';
 require KINT_DIR . 'parsers/parser.class.php';

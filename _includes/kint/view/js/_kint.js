@@ -1,10 +1,11 @@
-/**
-java -jar compiler.jar --js $FileName$ --js_output_file ../inc/kint.js --compilation_level ADVANCED_OPTIMIZATIONS --output_wrapper "(function(){%output%})()"
-*/
+// ==ClosureCompiler==
+// @output_file_name default.js
+// @compilation_level ADVANCED_OPTIMIZATIONS
+// @js_externs var kint
+// ==/ClosureCompiler==
 
-if ( typeof kintInitialized === 'undefined' ) {
-	kintInitialized = 1;
-	var kint = {
+if ( typeof kint === 'undefined' ) {
+	kint = {
 		visiblePluses : [], // all visible toggle carets
 		currentPlus   : -1, // currently selected caret
 

@@ -65,10 +65,8 @@ abstract class Controller{
 	public function renderBody($model = null){
 		global $emagid ; 
 
-		$path= $emagid->base_path.'/views/'.$this->name.'/'.$this->view.'.php';
-
-
-
+		$path = dirname(dirname(dirname(__DIR__))).DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.$this->name.DIRECTORY_SEPARATOR.$this->view.'.php';
+		
 		if(!include($path)){
 			die("<h1>Failed to load the view : ".$path."</h1>");
 		}

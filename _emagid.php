@@ -68,7 +68,7 @@ class Emagid{
 		//$this->loadLibraries($this->base_path.'libs/Emagid', false);
 
 		if($this->debug){ // load kint for debugging 
-			require_once($this->base_path.'libs/Emagid/_includes/kint/Kint.class.php');
+			require_once(__DIR__.DIRECTORY_SEPARATOR.'_includes'.DIRECTORY_SEPARATOR  .'kint'.DIRECTORY_SEPARATOR  .'Kint.class.php');
 		}
 		
 		$this->page = new \Emagid\Page\Page(); 
@@ -97,9 +97,10 @@ class Emagid{
 
 
 		if(isset($params['mvc']) || is_array($params['mvc'])){
-			global $emagid; 
+			global $emagid , $page; 
 
 			$emagid = $this;
+			$page =  $this;
 			$params['mvc']['root'] = $this->base_path;
 			\Emagid\Mvc\Mvc::load($params['mvc']);
 		}
