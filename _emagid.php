@@ -88,7 +88,7 @@ class Emagid{
 			}
 		}
 
-		if(ROOT_ADD && $this->base_path == '/')
+		if(defined(ROOT_ADD) && $this->base_path == '/')
 			$this->base_path = '/'.ROOT_ADD.'/';
 
 		// if (!$this->base_path && ROOT_PATH){

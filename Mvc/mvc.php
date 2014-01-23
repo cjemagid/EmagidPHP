@@ -59,6 +59,8 @@ class Mvc{
 		global $emagid; 
 
 
+
+
 		$exclude_ext = ['.css' , '.jpg', '.html' ,'.js'];
 
 		if(isset($arr['template']) && $arr['template'])
@@ -155,9 +157,13 @@ class Mvc{
 		}
 
 
-		$controller_name = self::loadController($controller_name); 
+
+		/*$controller_name = self::loadController($controller_name); 
+
 		if (!$controller_name)
-			return ;
+			return ;*/
+
+		$controller_name .= 'Controller'; 
 
 
 		$emagid->controller = new $controller_name();
@@ -165,8 +171,9 @@ class Mvc{
 		$req = strtolower($_SERVER['REQUEST_METHOD']); 
 
 		$method = $view_name.'_'.$req; 
+		
 
-		if(method_exists($emagid->controller, $method)){
+		if(method_exists($emagid->controller, $method)){ 
 			call_user_func_array(array(&$emagid->controller, $method),$segments);
 		}else 
 			call_user_func_array(array(&$emagid->controller, $view_name),$segments);
@@ -177,36 +184,36 @@ class Mvc{
 	}
 
 
-	private static function loadController($controller_name){
-		global $emagid; 
+	// private static function loadController($controller_name){
+	// 	global $emagid; 
 
-		$paths = [
-			ROOT_PATH.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$controller_name.'.php', 
-			ROOT_PATH.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$controller_name.'Controller.php', 
-		];
+	// 	$paths = [
+	// 		ROOT_PATH.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$controller_name.'.php', 
+	// 		ROOT_PATH.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$controller_name.'Controller.php', 
+	// 	];
 
 
 
-		foreach ($paths as $path) {
-			if(file_exists($path)) {
-				require_once($path);
+	// 	foreach ($paths as $path) {
+	// 		if(file_exists($path)) {
+	// 			require_once($path);
 
-				if(class_exists($controller_name))
-					return $controller_name;
+	// 			if(class_exists($controller_name))
+	// 				return $controller_name;
 
-				if(class_exists($controller_name .'Controller'))
-					return $controller_name .'Controller';
+	// 			if(class_exists($controller_name .'Controller'))
+	// 				return $controller_name .'Controller';
 
-			}
+	// 		}
 
 
 			
 
-		}
+	// 	}
 
-		return false;
+	// 	return false;
 
-	}
+	// }
 	
 
 

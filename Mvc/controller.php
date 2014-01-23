@@ -50,10 +50,12 @@ abstract class Controller{
 			$this->view = $view; 
 
 		if($this->template){
-			$path = '/templates/'.$this->template.'/'.$this->template.'.php';
-			$path = (ROOT_PATH.str_replace('/', DIRECTORY_SEPARATOR, $path));
 
-			include($path);
+			$path = 'templates/'.$this->template.'/'.$this->template.'.php';
+			//$path = (ROOT_PATH.str_replace('/', DIRECTORY_SEPARATOR, $path));
+
+
+			require($path);
 		}else{
 
 			$this->renderBody($model);
@@ -65,7 +67,7 @@ abstract class Controller{
 	public function renderBody($model = null){
 		global $emagid ; 
 
-		$path = dirname(dirname(dirname(__DIR__))).DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.$this->name.DIRECTORY_SEPARATOR.$this->view.'.php';
+		$path = 'views'.DIRECTORY_SEPARATOR.$this->name.DIRECTORY_SEPARATOR.$this->view.'.php';
 		
 		if(!include($path)){
 			die("<h1>Failed to load the view : ".$path."</h1>");
