@@ -208,6 +208,8 @@ class Form {
 
 	 	$fld=$this->model->fields[$field_name];
 
+
+
 	 	if(!isset($fld['type']))
 	 		$fld['type'] = 'text';
 
@@ -221,7 +223,7 @@ class Form {
 			$htmlObjects['type'] = $fld['type'];
 		}
 
-		if($fld['required']){
+		if(isset($fld['required']) && $fld['required']){
 			$htmlObjects['required'] = 'required';
 
 		}

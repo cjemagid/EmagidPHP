@@ -96,7 +96,7 @@ class Emagid{
 		// }
 
 
-		if(isset($params['mvc']) || is_array($params['mvc'])){
+		if(isset($params['mvc']) && is_array($params['mvc'])){
 			global $emagid , $page; 
 
 			$emagid = $this;
@@ -104,6 +104,8 @@ class Emagid{
 			$params['mvc']['root'] = $this->base_path;
 			\Emagid\Mvc\Mvc::load($params['mvc']);
 		}
+
+		
 
 		
 
@@ -153,46 +155,46 @@ class Emagid{
 	* 
 	* @param $arr Array - array of include files, will override the default class config
 	*/
-	public function loadIncludes($arr = null ){
-		if(isset($arr) && $arr != null){
-			$this->include_paths = $arr;
-		}
+	// public function loadIncludes($arr = null ){
+	// 	if(isset($arr) && $arr != null){
+	// 		$this->include_paths = $arr;
+	// 	}
 
-		foreach($this->include_paths as $folder ){
+	// 	foreach($this->include_paths as $folder ){
 
 
-			$this->loadLibraries($folder);
+	// 		$this->loadLibraries($folder);
 			
-		}
+	// 	}
 
-	}
+	// }
 
 
-	/**
-	* Load the eMagid libraries 
-	*/
-	function loadLibraries($folder , $loadFiles = true){
+	// /**
+	// * Load the eMagid libraries 
+	// */
+	// function loadLibraries($folder , $loadFiles = true){
 
-		if ($handle = opendir($folder)) {
-		    /* Loop through directories  */
-		    while (false !== ($entry = readdir($handle))) {
+	// 	if ($handle = opendir($folder)) {
+	// 	    /* Loop through directories  */
+	// 	    while (false !== ($entry = readdir($handle))) {
 
-		    	if(!startsWith($entry,'.') && !startsWith($entry,'_')){ // skip git folders, up folder,etc... 
+	// 	    	if(!startsWith($entry,'.') && !startsWith($entry,'_')){ // skip git folders, up folder,etc... 
 		    	
-			    	if(stristr($entry,".php") ){
-			    		if($loadFiles){ // load all files in the current directory
-			    			require_once($folder."/".$entry);
-			    		}
-			    	} else { // it's a folder
-			    			$this->loadLibraries($folder."/".$entry); // recursion 
-			    	}
+	// 		    	if(stristr($entry,".php") ){
+	// 		    		if($loadFiles){ // load all files in the current directory
+	// 		    			require_once($folder."/".$entry);
+	// 		    		}
+	// 		    	} else { // it's a folder
+	// 		    			$this->loadLibraries($folder."/".$entry); // recursion 
+	// 		    	}
 		        
-				}
-		    }
+	// 			}
+	// 	    }
 
-		    closedir($handle);
-		}
-	}
+	// 	    closedir($handle);
+	// 	}
+	// }
 
 
 	private function scaffold(){

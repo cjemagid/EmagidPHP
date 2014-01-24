@@ -34,6 +34,15 @@ abstract class Db{
 	public $fields = array(); 
 
 
+
+	/** 
+	* @var Array of error messages from the PDO object
+	*/ 
+	public $errors = [] ;
+
+
+
+
 	/**
 	* @var int id of the current record 
 	*/
@@ -58,26 +67,15 @@ abstract class Db{
 	* @return Object - the db object.
 	*/
 	protected function getConnection (){
-
 		global $emagid ;
 
-		if($this->db ==null ){
+		$this->db = new \PDO("mysql:host={$emagid->connection_string->host};dbname={$emagid->connection_string->db_name};charset=utf8", $emagid->connection_string->username, $emagid->connection_string->password);
 
-			require_once("ez_sql_core.php");
-			require_once("ez_sql_mysql.php");
-
-
-
-			$this->db = new \ezSQL_mysql(
-				$emagid->connection_string->username, 
-				$emagid->connection_string->password,  // pwd
-				$emagid->connection_string->db_name,  // dbname 
-				$emagid->connection_string->host);
-
-		}
-
-		return $this->db;
+		return $this->db ;
 	}
+
+
+	
 
 
 	/**
@@ -101,7 +99,7 @@ abstract class Db{
 			$sql.=" WHERE ". $this->buildWhere($params['where']);
 		}
 
-		return $db->get_var($sql);
+		return $this->getVar($sql);
 	}
 	
 
@@ -152,16 +150,31 @@ abstract class Db{
 			if(isset($params['offset'])){
 				$sql.= " OFFSET ".$params['offset'];
 			}
+
+
 	}//close construct sql
+
+
+
+
+		$sth = $this->db->prepare($sql);
+		$sth->execute();
+		$dbList = $sth->fetchAll();
+
 	
-		 $dbList = $db->get_results($sql); 
+		  
 
 			$list = [] ;
+
 		if($dbList && count($dbList)){
 
 			$cls = get_class($this); 
 
 			foreach( $dbList  as $item){
+
+				if (is_array($item))
+					$item = array_to_object($item); 
+
 				$obj = new $cls ; 
 
 				clone_into($item, $obj);
@@ -199,34 +212,24 @@ abstract class Db{
 
 	/**
 	* get list from a table
-	* @param $id int get a single record by id.
+	* @param $id int get     a single record by id.
+	* @param $options Array  added instructions : 
 	* @return Object  object representing a single result line from the DB .
 	*/
-	function getItem($id){
+	function getItem($id, Array $options = []){
 
 		$db = $this->getConnection(); 
-		
-
-		$sql = "SELECT * FROM $this->table_name WHERE $this->fld_id=".$id;
-
-		$row = $db->get_row($sql);
 
 
-		if(count($row)>0){
-			// assign the values to the current object. 
-			// required for the update/insert functionality .
-			$arr = object_to_array($row);
 
-			$this->id = $row->{$this->fld_id};
-			
-			foreach($arr as $key => $val){
-				$this->{$key}=$val;
-			}
+		//$sql = "SELECT * FROM $this->table_name WHERE $this->fld_id=".$id;
+		//'sql'=>$sql
+		$list = $this->getList(['where' => [$this->fld_id => $id ]]);
 
-			//$this->loadRelationShips($this);
-		}
+		if (count($list))
+			return $list[0]; 
 
-		return $this;
+		return null; 
 	}
 
 	/**
@@ -235,16 +238,12 @@ abstract class Db{
 	function delete($id){
 
 		$db = $this->getConnection();
+
 		$sql = "DELETE FROM $this->table_name WHERE $this->fld_id=".$id;
-		$db->query($sql);
-	}
 
+		$sth = $db->prepare($sql);
 
-	function get_row($sql){
-		$db = $this->getConnection();
-
-
-		return $db->get_row($sql);
+		$sth->execute();
 	}
 
 
@@ -270,6 +269,9 @@ abstract class Db{
 	* Insert / Update the current record 
 	*/
 	function save(){
+
+		global $emagid ;
+
 	  $db = $this->getConnection();
 		
 		
@@ -311,12 +313,15 @@ abstract class Db{
 					$val = "NULL "; 
 				}
 				else {
-					$val = $db->escape($vals[$fld]);
+					//$val = $db->escape($vals[$fld]);
+					$val = $vals[$fld];
 					$val = is_numeric($val)?$val:sprintf("'%s'", $val);
 				}
 			}else{
 
 			}
+
+
 
 			array_push($update , sprintf("%s=%s", $fld, $val));
 			array_push($insert_names, $fld);
@@ -339,18 +344,42 @@ abstract class Db{
 		
 		
 
-		if($db->query($sql)){
+		if($this->execute($sql)){
+
 				if($this->id == 0 )
 				{
-					$this->id = $db->get_var("SELECT LAST_INSERT_ID() as id ");
+
+					$this->id = $this->getVar("SELECT LAST_INSERT_ID() as id ");
 				}
 
 				return true;
 		}else{
-			die($sql . "<br/>" . mysql_error());
+
+			if ($emagid->debug){
+				dd($this->errors);
+			}
+			
 			return false;
 		}
 		
+	}
+
+	function execute($sql){
+		$sth = $this->db->prepare($sql);
+		$res = $sth->execute();
+
+		$this->errors = $sth->errorInfo();
+
+		return $res;
+	}
+
+	function getVar($sql){
+		$sth = $this->db->prepare($sql);
+		$sth->execute();
+
+		$result = $sth->fetchColumn();
+
+		return $result;
 	}
 
 	function query($sql){
@@ -358,6 +387,8 @@ abstract class Db{
 
 	  $db->query($sql);
 	}
+
+
 
 
 

@@ -9,6 +9,12 @@ class AutoLoader {
 	public static function isExists($folder , $classname){
 		$filename = $folder.DIRECTORY_SEPARATOR .$classname.".php";
 
+
+		
+		// ensure consistency and solve a problem with linux not recognizing the path as fodlers but think it's a file name .
+		$filename = str_replace('/', DIRECTORY_SEPARATOR, $filename);
+		$filename = str_replace('\\', DIRECTORY_SEPARATOR, $filename);
+
 		if (file_exists($filename)){
 			include_once($filename) ;
 			return true ;
@@ -25,14 +31,19 @@ class AutoLoader {
 	public static function  loadNamespace($classname){
 		global $included_folders;
 
+ 		if (self::isExists('', $classname) ){			
+ 		}
 		if (endsWith($classname, 'Controller') && !endsWith($classname, '\Controller')){
+
 			if (self::isExists('controllers', $classname) ||  self::isExists('controller', $classname)){
-				if (class_exists($classname)) return true;
+				
 			}
 
 		} else if (self::isExists('lib', $classname) ||  self::isExists('libs', $classname)){	
-			if (class_exists($classname)) return true;
+			
 		}
+
+		if (class_exists($classname)) return true;
 
 		return false;
 		

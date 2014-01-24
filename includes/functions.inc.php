@@ -4,75 +4,100 @@
 */ 
 
 
-/** 
-	* convert an array to an object 
-	*
-	* @param Array
-	* @return strClass 
-	*/
-	function array_to_object($array) {
-	  $obj = new stdClass;
 
-	  foreach($array as $k => $v) {
+/**
+* Clone all the fields from one object into another, both already initialized
+*/
+function clone_into($source, &$target){
+
+	  foreach($source as $k => $v) {
 	     if(is_array($v)) {
-	        $obj->{$k} = array_to_object($v); //RECURSION
+	        $target->{$k} = array_to_object($v); //RECURSION
 	     } else {
-	        $obj->{$k} = $v;
+	        $target->{$k} = $v;
 	     }
 	  }
 
-	  return $obj;
-	} 
+}
 
-	/** 
-	* convert object to an array
-	*
-	* @param $data Object 
-	* @return Array named array 
-	*/
-	function object_to_array($data)
-	{
-	    if (is_array($data) || is_object($data))
-	    {
-	        $result = array();
-	        foreach ($data as $key => $value)
-	        {
-	            $result[$key] = object_to_array($value);
-	        }
-	        return $result;
-	    }
-	    return $data;
-	}
+
+/**
+* Simple redirect
+*
+* @param string $url 
+*/
+function redirect($url){
+	header("Location:".$url);
+	die(); 
+}
+
 
 
 
-	/**
-	* Clone all the fields from one object into another, both already initialized
-	*/
-	function clone_into($source, &$target){
-
-		  foreach($source as $k => $v) {
-		     if(is_array($v)) {
-		        $target->{$k} = array_to_object($v); //RECURSION
-		     } else {
-		        $target->{$k} = $v;
-		     }
-		  }
-
-	}
+	/** 
+* Global functions 
+*/ 
 
 
-	/**
-	* Simple redirect
-	*
-	* @param string $url 
-	*/
-	function redirect($url){
-		header("Location:".$url);
-		die(); 
-	}
+function startsWith($haystack, $needle)
+{
+    return $needle === "" || strpos($haystack, $needle) === 0;
+}
 
 
+function endsWith($haystack, $needle)
+{
+    return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
+}
 
-	
-?>
+/** 
+* convert an array to an object 
+*
+* @param Array
+* @return strClass 
+*/
+function array_to_object($array) {
+
+  return json_decode(json_encode($array));
+  
+  // $obj = new stdClass;
+
+  // foreach($array as $k => $v) {
+  //    if(is_array($v)) {
+  //       $obj->{$k} = $this->array_to_object($v); //RECURSION
+  //    } else {
+  //       $obj->{$k} = $v;
+  //    }
+  // }
+
+  // return $obj;
+} 
+
+/** 
+* convert object to an array
+*
+* @param $data Object 
+* @return Array named array 
+*/
+function object_to_array($data)
+{
+    if (is_array($data) || is_object($data))
+    {
+        $result = array();
+        foreach ($data as $key => $value)
+        {
+            
+            $result[$key] = object_to_array($value);
+        }
+        return $result;
+    }
+    return $data;
+}
+
+
+/**
+* checks whether an array is associative 
+*/
+function is_assoc($var) {
+    return is_array($var) && array_diff_key($var,array_keys(array_keys($var)));
+}

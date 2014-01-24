@@ -167,6 +167,7 @@ class Mvc{
 
 
 		$emagid->controller = new $controller_name();
+		$emagid->controller->view = $view_name;
 
 		$req = strtolower($_SERVER['REQUEST_METHOD']); 
 

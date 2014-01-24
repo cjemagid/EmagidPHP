@@ -69,6 +69,7 @@ abstract class Controller{
 
 		$path = 'views'.DIRECTORY_SEPARATOR.$this->name.DIRECTORY_SEPARATOR.$this->view.'.php';
 		
+		
 		if(!include($path)){
 			die("<h1>Failed to load the view : ".$path."</h1>");
 		}
