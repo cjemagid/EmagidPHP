@@ -163,10 +163,16 @@ class Mvc{
 		if (!$controller_name)
 			return ;*/
 
+		$name = $controller_name;
 		$controller_name .= 'Controller'; 
 
 
+
 		$emagid->controller = new $controller_name();
+		$emagid->controller->name = $name;
+
+		
+
 		$emagid->controller->view = $view_name;
 
 		$req = strtolower($_SERVER['REQUEST_METHOD']); 

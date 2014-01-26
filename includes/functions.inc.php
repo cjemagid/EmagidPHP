@@ -9,7 +9,6 @@
 * Clone all the fields from one object into another, both already initialized
 */
 function clone_into($source, &$target){
-
 	  foreach($source as $k => $v) {
 	     if(is_array($v)) {
 	        $target->{$k} = array_to_object($v); //RECURSION
@@ -17,7 +16,6 @@ function clone_into($source, &$target){
 	        $target->{$k} = $v;
 	     }
 	  }
-
 }
 
 

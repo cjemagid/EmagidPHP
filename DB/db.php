@@ -54,7 +54,8 @@ abstract class Db{
 	public $relationships = []  ;
 
 
-	function __construct($params){
+	function __construct($params = null){
+
 		if(is_int($params)){ // safe to assume that the user wanted to load a single record 
 			$this->getItem($params);
 		}
@@ -159,7 +160,7 @@ abstract class Db{
 
 		$sth = $this->db->prepare($sql);
 		$sth->execute();
-		$dbList = $sth->fetchAll();
+		$dbList = $sth->fetchAll(\PDO::FETCH_ASSOC);
 
 	
 		  
@@ -323,8 +324,8 @@ abstract class Db{
 
 
 
-			array_push($update , sprintf("%s=%s", $fld, $val));
-			array_push($insert_names, $fld);
+			array_push($update , sprintf("`%s`=%s", $fld, $val));
+			array_push($insert_names, "`".$fld."`");
 			array_push($insert_vals, sprintf("%s", $val));	
 		}
 		
@@ -337,7 +338,7 @@ abstract class Db{
 		}else {
 			$vals = implode(',', $update );
 			$sql = "UPDATE $this->table_name SET $vals";
-			$sql .= " WHERE id={$this->id}";
+			$sql .= " WHERE {$this->fld_id}={$this->id}";
 		}
 
 
@@ -356,7 +357,8 @@ abstract class Db{
 		}else{
 
 			if ($emagid->debug){
-				dd($this->errors);
+
+				dd($sql,$this->errors);
 			}
 			
 			return false;
