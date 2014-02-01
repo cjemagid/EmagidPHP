@@ -4,9 +4,10 @@
 if($_SERVER['DOCUMENT_ROOT'])  {
 	$folder = dirname(dirname(__DIR__));  // assuming that the library is in '/lib/emagid/'
 
+
 	set_include_path($folder);
 
-	define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT'] .  (defined(ROOT_ADD) ? DIRECTORY_SEPARATOR.ROOT_ADD : ''));
+	define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT'] .  (defined('ROOT_ADD') ? DIRECTORY_SEPARATOR.ROOT_ADD : ''));
 }
 
 

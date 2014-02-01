@@ -5,7 +5,7 @@ namespace Emagid\Mvc;
 /**
 * Base class for controllers
 */
-abstract class Controller{
+class Controller{
 
 	/**
 	* @var string
@@ -43,7 +43,7 @@ abstract class Controller{
 	* @param object $model 	object that contains all the data for the view.
 	*         
 	*/
-	protected function loadView(string $view = null , $model = null ){
+	public function loadView(string $view = null , $model = null ){
 		global $emagid ; 
 
 		if($view)
@@ -68,9 +68,16 @@ abstract class Controller{
 		global $emagid ; 
 
 		$path = 'views'.DIRECTORY_SEPARATOR.$this->name.DIRECTORY_SEPARATOR.$this->view.'.php';
-		
-		if(!include($path)){
-			die("<h1>Failed to load the view : ".$path."</h1>");
+
+		if (file_exists($path)){		
+			if(!include($path)){
+				die("<h1>Failed to load the view : ".$path."</h1>");
+			}
+		}
+		else {
+			echo ("<strong>ERROR : </strong>Could not find file : ".$path);
+			//d (\Emagid\Mvc\Mvc::$route);
+
 		}
 	}
 

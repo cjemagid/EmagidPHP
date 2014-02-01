@@ -10,17 +10,26 @@ use Emagid\Emagid;
 class Mvc{
 
 
+	/**
+	*
+	*/
+	public static $errors = [];	
+
+
 
 	/**
 	* @var string site's root, used to determine where the controller starts 
 	*/
-	private static $debug = true; 
+	private static $debug = false; 
 
 
 	/**
 	* @var string site's root, used to determine where the controller starts 
 	*/
 	private static $root = '/'; 
+
+
+	private static $uri = ''; 
 
 
 	/**
@@ -35,15 +44,28 @@ class Mvc{
 	private static $default_view = 'index'; 
 
 
+	/**
+	* @var string the active route .
+	*/
+	public static $route = [];
+
+
 
 	/**
 	* @var array - routing table allows the user to  add new "translators " for routes
 	* 				- name : name for the route
 	*				- pattern : using regular expression
 	*				- controller
-	*				- action
-	*/
+	*				- action	*/
 	private static $routes = []; 
+
+	private static $base_routes = [
+			[
+			'pattern'=>'{?controller}/{?action}/{?id}',
+			'controller' => 'home',
+			'action' => 'index'
+			]
+		]; 
 
 
 	/**
@@ -109,30 +131,38 @@ class Mvc{
 			}
 		}
 
+		self::$uri = $uri; 
+
+
 
 		$route_found = false; 
 
-		if(self::$routes && count(self::$routes)>0 ){
-			foreach (self::$routes as $route ) {
+		$routes = array_merge(self::$routes , self::$base_routes);
+		$ok_routes = [];
 
-				if($uri == $route['pattern']){
+		foreach ($routes as $route) {
+			$in_route = self::testPattern($route);
 
-					$segments = [];
+			if ($in_route){
+				$ok_routes[] = $in_route; 
 
-					$route_found = true; 
-
-					$controller_name = $route['controller'] ;
-					$view_name = $route['action'];
-
-					break;
-				}
-				
-			}
+			}	
 		}
 
 
+		$route_found = count($ok_routes);
 
-		if(!$route_found){
+		if ($route_found ) {
+			$route = $ok_routes[0];
+			
+			self::$route = $route ;
+
+ 			$controller_name = $route['controller'] ;
+		 	$view_name = $route['action'];
+		 	$segments = $route;
+
+
+		} else {
 
 
 			$segments = $uri != '' && $uri != '/' ? explode('/', $uri) : array();
@@ -158,6 +188,9 @@ class Mvc{
 
 
 
+
+
+
 		/*$controller_name = self::loadController($controller_name); 
 
 		if (!$controller_name)
@@ -166,12 +199,17 @@ class Mvc{
 		$name = $controller_name;
 		$controller_name .= 'Controller'; 
 
+		if (class_exists($controller_name)){
+			$emagid->controller = new $controller_name();
+			$emagid->controller->name = $name;
+		} else {
+			$errors[] = "Controller $name was not found";
+			// controller was not found, trying to load the view directly 
+			$emagid->controller = new \Emagid\Mvc\Controller();
+			$emagid->controller->name = $name;
 
+		}
 
-		$emagid->controller = new $controller_name();
-		$emagid->controller->name = $name;
-
-		
 
 		$emagid->controller->view = $view_name;
 
@@ -182,8 +220,13 @@ class Mvc{
 
 		if(method_exists($emagid->controller, $method)){ 
 			call_user_func_array(array(&$emagid->controller, $method),$segments);
-		}else 
+		}else if(method_exists($emagid->controller, $view_name)) {
 			call_user_func_array(array(&$emagid->controller, $view_name),$segments);
+		} else  {
+			$emagid->controller->loadView();
+		}
+
+
 
 		die();
 		
@@ -191,37 +234,53 @@ class Mvc{
 	}
 
 
-	// private static function loadController($controller_name){
-	// 	global $emagid; 
+	/**
+	* Make sure a pattern applies to the current uri . 
+	*/
+	private static function testPattern($pattern){
+		$uri = self::$uri;
 
-	// 	$paths = [
-	// 		ROOT_PATH.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$controller_name.'.php', 
-	// 		ROOT_PATH.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$controller_name.'Controller.php', 
-	// 	];
+		$segments = explode('/', $pattern['pattern']);
 
+		$uri_segments = explode('/', $uri);
 
+		$mvc_parts = array_merge([],$pattern);
 
-	// 	foreach ($paths as $path) {
-	// 		if(file_exists($path)) {
-	// 			require_once($path);
+		foreach ($segments as $index=>$segment) {
 
-	// 			if(class_exists($controller_name))
-	// 				return $controller_name;
-
-	// 			if(class_exists($controller_name .'Controller'))
-	// 				return $controller_name .'Controller';
-
-	// 		}
-
-
+			$psegment = $segments[$index]; 
+			$val = ($index >= count($uri_segments))?'':$uri_segments[$index]; 
 			
 
-	// 	}
+			if (startsWith($psegment,'{') && endsWith($psegment,'}')  ){
+				$psegment = trim(substr($psegment,1,strlen($psegment)-2));
 
-	// 	return false;
+				if (startsWith($psegment,'?')){
+					$optional = true ; 
+					$psegment = substr($psegment, 1) ;
+				} else {
+					$optional = false;
+				}
 
-	// }
-	
+
+				if ($val){
+					$mvc_parts[$psegment] = $uri_segments[$index];
+				} else { // mandatory parameter not supplied
+
+					if (!$optional)
+						return false;
+
+				}
+				
+			} else {
+
+				if ($psegment != $val)
+					return false;
+			}
+		}
+
+		return $mvc_parts;
+	}
 
 
 	/**

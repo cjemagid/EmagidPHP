@@ -376,7 +376,9 @@ abstract class Db{
 	}
 
 	function getVar($sql){
-		$sth = $this->db->prepare($sql);
+		$db = $this->getConnection ();
+		$sth = $db->prepare($sql);
+
 		$sth->execute();
 
 		$result = $sth->fetchColumn();

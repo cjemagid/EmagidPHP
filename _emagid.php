@@ -88,7 +88,7 @@ class Emagid{
 			}
 		}
 
-		if(defined(ROOT_ADD) && $this->base_path == '/')
+		if(defined('ROOT_ADD') && $this->base_path == '/')
 			$this->base_path = '/'.ROOT_ADD.'/';
 
 		// if (!$this->base_path && ROOT_PATH){
@@ -107,6 +107,7 @@ class Emagid{
 
 		
 
+		return $this; 
 		
 
 	}
@@ -195,6 +196,25 @@ class Emagid{
 	// 	    closedir($handle);
 	// 	}
 	// }
+
+
+
+
+
+	/**
+	* Load the emagid MVC framework 
+	*/
+	public function loadMvc(Array $params = []  ){
+
+		if(!isset($params['root']))
+			$params['root'] = $this->root ;
+
+
+		\Emagid\Mvc\Mvc::Load($params);
+
+		return $this; 
+		
+	}
 
 
 	private function scaffold(){
