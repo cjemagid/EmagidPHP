@@ -65,7 +65,7 @@ class Emagid{
 		if(count($params)>0)
 			$this->readParams($params);
 
-		//$this->loadLibraries($this->base_path.'libs/Emagid', false);
+		
 
 		if($this->debug){ // load kint for debugging 
 			require_once(__DIR__.DIRECTORY_SEPARATOR.'_includes'.DIRECTORY_SEPARATOR  .'kint'.DIRECTORY_SEPARATOR  .'Kint.class.php');
@@ -88,28 +88,7 @@ class Emagid{
 			}
 		}
 
-		if(defined('ROOT_ADD') && $this->base_path == '/')
-			$this->base_path = '/'.ROOT_ADD.'/';
-
-		// if (!$this->base_path && ROOT_PATH){
-		// 	$this->base_path = ROOT_PATH;
-		// }
-
-
-		if(isset($params['mvc']) && is_array($params['mvc'])){
-			global $emagid , $page; 
-
-			$emagid = $this;
-			$page =  $this;
-			$params['mvc']['root'] = $this->base_path;
-			\Emagid\Mvc\Mvc::load($params['mvc']);
-		}
-
-		
-
 		return $this; 
-		
-
 	}
 
 
@@ -217,10 +196,6 @@ class Emagid{
 	}
 
 
-	private function scaffold(){
-		include($this->base_path.'/libs/Emagid/_includes/emagid_scaffold/index.php');
-		
-	}
 
 	
 
