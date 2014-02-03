@@ -218,10 +218,13 @@ class Mvc{
 		$method = $view_name.'_'.$req; 
 		
 
+
 		if(method_exists($emagid->controller, $method)){ 
-			call_user_func_array(array(&$emagid->controller, $method),$segments);
+			//call_user_func_array(array(&$emagid->controller, $method),$segments);
+			$emagid->controller->$method($segments);
 		}else if(method_exists($emagid->controller, $view_name)) {
-			call_user_func_array(array(&$emagid->controller, $view_name),$segments);
+			$emagid->controller->$view_name($segments);
+			//call_user_func_array(array(&$emagid->controller, $view_name),$segments);
 		} else  {
 			$emagid->controller->loadView();
 		}
@@ -264,7 +267,14 @@ class Mvc{
 
 
 				if ($val){
-					$mvc_parts[$psegment] = $uri_segments[$index];
+
+					$dbObj = self::testModelRoute($psegment, $val);
+
+					if ($dbObj){
+						$mvc_parts[$dbObj['key']] = $dbObj['val'];
+					}else {
+						$mvc_parts[$psegment] = $uri_segments[$index];
+					}
 				} else { // mandatory parameter not supplied
 
 					if (!$optional)
@@ -280,6 +290,38 @@ class Mvc{
 		}
 
 		return $mvc_parts;
+	}
+
+
+	private static function  testModelRoute ($input_line,$val) {
+		$output_array = [] ;
+		//$input_line = "id[\Model\Book:id]";
+		$regex = "/([a-zA-Z0-9-_]+)\[([\w\\\s?]+)\:(\w+)\]/";
+
+		preg_match($regex, $input_line, $output_array);
+
+		if (count($output_array)==4 ){ // it's a DB path 
+
+			$obj  = new $output_array[2](); 
+			$list = $obj->getList([
+					'where'=> [
+						$output_array[3] => $val
+					]
+				]);
+
+			if (count($list) == 1 ){
+				return [
+				'key'=>$output_array[1],
+				'val'=>$list[0]
+				];
+			}
+
+			
+
+		}
+
+		return false;
+
 	}
 
 
