@@ -91,7 +91,7 @@ abstract class Db{
 
 		$db = $this->getConnection(); 
 
-		$sql = "SELECT count(*) FROM $this->table_name";
+		$sql = "SELECT count(*) FROM ". $this->getTableName();
 
 
 	
@@ -129,7 +129,7 @@ abstract class Db{
 			$sql = $params['sql'];
 	
 	}else{
-			$sql = "SELECT * FROM $this->table_name";
+			$sql = "SELECT * FROM ".$this->getTableName();
 	
 			// apply where conditions
 			if(isset($params['where'])){ // apply where conditions
@@ -240,6 +240,7 @@ abstract class Db{
 
 		$db = $this->getConnection();
 
+		$this->getTableName();
 		$sql = "DELETE FROM $this->table_name WHERE $this->fld_id=".$id;
 
 		$sth = $db->prepare($sql);
@@ -328,6 +329,9 @@ abstract class Db{
 			array_push($insert_names, "`".$fld."`");
 			array_push($insert_vals, sprintf("%s", $val));	
 		}
+
+		$this->getTableName();
+		
 		
 		// decide whether we need an INSERT or an UPDATE, and build the SQL query.
 		if($this->id == 0){
@@ -477,7 +481,28 @@ abstract class Db{
 
 	}
 
+	
+	/**
+	* return or create the name of the table.
+	* @return string 
+	*/
+	protected function getTableName(){
+		if ($this->table_name)
+			return $this->table_name; 
 
+		$class = get_class($this);
+
+		if (stristr($class, '\\')){
+			$segments = explode('\\', $class); 
+			$class = $segments[count($segments)-1];
+
+
+		}
+
+		$this->table_name = $class ; 
+
+		return $this->table_name; 
+	}
 
 
 	function loadChildren($params){
