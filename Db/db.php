@@ -120,43 +120,39 @@ abstract class Db{
 	* @return Array array of objects from the db table.
 	*/
 	function getList($params = array()){
-
 		$db = $this->getConnection(); 
 
 		
-	if(isset($params['sql'])){
-			//if sql is set, just execute it without apply any other params
-			$sql = $params['sql'];
-	
-	}else{
-			$sql = "SELECT * FROM ".$this->getTableName();
-	
-			// apply where conditions
-			if(isset($params['where'])){ // apply where conditions
-				$sql.=" WHERE ". $this->buildWhere($params['where']);
-			}
-			
-			// apply order and sort
+		if(isset($params['sql'])){
+				//if sql is set, just execute it without apply any other params
+				$sql = $params['sql'];
+		
+		}else{
+				$sql = "SELECT * FROM ".$this->getTableName();
+		
+				// apply where conditions
+				if(isset($params['where'])){ // apply where conditions
+					$sql.=" WHERE ". $this->buildWhere($params['where']);
+				}
+				
+				// apply order and sort
 
-			isset($params['orderBy'])? $orderBy = $params['orderBy'] : $orderBy = $this->fld_id." DESC";
-			
-			$sql.= " ORDER BY {$orderBy}";
-
-
-			// apply pagination
-			if(isset($params['limit'])){
-				$sql.= " LIMIT ".$params['limit'];
-			}
-			
-			if(isset($params['offset'])){
-				$sql.= " OFFSET ".$params['offset'];
-			}
+				isset($params['orderBy'])? $orderBy = $params['orderBy'] : $orderBy = $this->fld_id." DESC";
+				
+				$sql.= " ORDER BY {$orderBy}";
 
 
-	}//close construct sql
+				// apply pagination
+				if(isset($params['limit'])){
+					$sql.= " LIMIT ".$params['limit'];
+				}
+				
+				if(isset($params['offset'])){
+					$sql.= " OFFSET ".$params['offset'];
+				}
 
 
-
+		}//close construct sql
 
 		$sth = $this->db->prepare($sql);
 		$sth->execute();
@@ -209,6 +205,54 @@ abstract class Db{
 		}
 	}
 
+
+	/**
+	* a static method to init the enclosing class and execute 'getList' method
+	*/
+	static function select(){
+		$args = func_get_args() ;
+
+		while(is_array($args) && count($args)==1 && !is_assoc($args))
+			$args = $args[0];
+
+		// if (is_array($args) && count($args)==1 )
+		// 	$args = $args[0];
+
+		$className = get_called_class();
+
+		$obj = new $className();
+
+		return $obj->getList($args);
+	}
+
+
+
+	/**
+	* a static method to init the enclosing object and return a single object from getItem, or the first item returned from a getList method .
+	*/
+	static function selectItem(){
+
+		$className = get_called_class();
+
+		$obj = new $className();
+
+		$args = func_get_args() ;
+
+		if(count($args) == 0)
+			return $obj ;
+
+	
+		if (is_array($args[0])) {
+			$res = self::select($args); 
+
+			if (count($res) == 0 )
+				return null ;
+
+			return $res [0] ;
+		}
+
+		return $obj->getItem ($args[0]);
+	}
 
 
 	/**
