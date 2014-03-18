@@ -43,7 +43,7 @@ class Controller{
 	* @param object $model 	object that contains all the data for the view.
 	*         
 	*/
-	public function loadView(string $view = null , $model = null ){
+	public function loadView($view = null , $model = null ){
 		global $emagid ; 
 
 		if($view)

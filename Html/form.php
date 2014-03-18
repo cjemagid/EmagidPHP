@@ -202,7 +202,7 @@ class Form {
 
 	 		// no special setting for that field , return a text box setting :
 
-	 		return $this->textBoxFor($field_name, $options = [], $label , $htmlObjects);
+	 		return $this->textBoxFor($field_name, $htmlObjects);
 
 	 	}
 

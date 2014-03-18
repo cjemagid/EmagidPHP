@@ -84,7 +84,8 @@ abstract class Db{
 	* @param $params Array - conditions 
 	*		 $params = array(
 	*						"where" => array(field_name => handle, field_name => handle) //where condition for "=" and "AND"  only, NO "OR", "LIKE" or anyothers 
-	*						);
+	*						"where_string" => string, this is a quick fix for the where array above for adding "!=" and "OR"
+	);
 	* @return int number of records in the table 
 	*/
 	function getCount($params = array()){
@@ -96,8 +97,17 @@ abstract class Db{
 
 	
 		// apply where conditions
-		if(isset($params['where'])){ // apply where conditions
+		if(isset($params['where']) && is_array($params['where']) && count($params['where'])>0){ // apply where conditions
 			$sql.=" WHERE ". $this->buildWhere($params['where']);
+		}
+		
+		// apply where conditions for "!=" and "OR"
+		if(isset($params['where_string'])){ 
+			if(isset($params['where']) && is_array($params['where']) && count($params['where'])>0){ 
+				$sql.= " AND " . $params['where_string'];
+			}else{
+				$sql.=" WHERE ". $params['where_string'];
+			}
 		}
 
 		return $this->getVar($sql);
@@ -112,6 +122,7 @@ abstract class Db{
 	*		 $params = array(
 	*						"sql" => sql statement //If this param is set, all other params would be DISABLED
 	*						"where" => array(field_name => handle, field_name => handle) //where condition for "=" and "AND"  only, NO "OR", "LIKE" or anyothers 
+	*						"where_string" => string, this is a quick fix for the where array above for adding "!=" and "OR"
 	*						"orderBy" => field_name 
 	*						"sort" => ASC or DESC 
 	*						"limit" => 10 //number
@@ -132,13 +143,22 @@ abstract class Db{
 			$sql = "SELECT * FROM $this->table_name";
 	
 			// apply where conditions
-			if(isset($params['where'])){ // apply where conditions
+			if(isset($params['where']) && is_array($params['where']) && count($params['where'])>0){ // apply where conditions
 				$sql.=" WHERE ". $this->buildWhere($params['where']);
+			}
+			
+			// apply where conditions for "!=" and "OR"
+			if(isset($params['where_string'])){ 
+				if(isset($params['where']) && is_array($params['where']) && count($params['where'])>0){ 
+					$sql.= " AND " . $params['where_string'];
+				}else{
+					$sql.=" WHERE ". $params['where_string'];
+				}
 			}
 			
 			// apply order and sort
 
-			isset($params['orderBy'])? $orderBy = $params['orderBy'] : $orderBy = $this->fld_id." DESC";
+			isset($params['orderBy'])? $orderBy = $params['orderBy'] . ' ' . $params['sort'] : $orderBy = $this->fld_id." DESC";
 			
 			$sql.= " ORDER BY {$orderBy}";
 
@@ -157,7 +177,7 @@ abstract class Db{
 
 
 
-
+		//d($sql);
 		$sth = $this->db->prepare($sql);
 		$sth->execute();
 		$dbList = $sth->fetchAll(\PDO::FETCH_ASSOC);
@@ -226,11 +246,31 @@ abstract class Db{
 		//$sql = "SELECT * FROM $this->table_name WHERE $this->fld_id=".$id;
 		//'sql'=>$sql
 		$list = $this->getList(['where' => [$this->fld_id => $id ]]);
+		
+		if(count($list)>0){
+			return $list[0];
+		}else{
+			return null; 
+		}
+	}
+	
+	/**
+	* get a single record Object from a table
+	* @param $field_name column name in db.
+	* @param $field_value look for this given value for the column name above.
+	* @return Object  object representing a single result line from the DB .
+	*/
+	function getItemByAttribute($field_name, $field_value){
 
-		if (count($list))
-			return $list[0]; 
+		$db = $this->getConnection(); 
 
-		return null; 
+		$list = $this->getList(['where' => [$field_name => $field_value]]);
+		
+		if(count($list)>0){
+			return $list[0];
+		}else{
+			return null; 
+		}
 	}
 
 	/**
@@ -241,6 +281,14 @@ abstract class Db{
 		$db = $this->getConnection();
 
 		$sql = "DELETE FROM $this->table_name WHERE $this->fld_id=".$id;
+
+		$sth = $db->prepare($sql);
+
+		$sth->execute();
+	}
+	
+	function delete_sql($sql){
+		$db = $this->getConnection();
 
 		$sth = $db->prepare($sql);
 
@@ -273,7 +321,7 @@ abstract class Db{
 
 		global $emagid ;
 
-	  $db = $this->getConnection();
+	    $db = $this->getConnection();
 		
 		
 		$vals = object_to_array($this);
@@ -283,6 +331,8 @@ abstract class Db{
 		
 		// arrays used for insert
 		$insert_names = array(); 
+		$insert_names_placeholder = array(); 
+		$val_params = array();
 		$insert_vals = array(); 
 		
 		
@@ -316,7 +366,7 @@ abstract class Db{
 				else {
 					//$val = $db->escape($vals[$fld]);
 					$val = $vals[$fld];
-					$val = is_numeric($val)?$val:sprintf("'%s'", $val);
+					//$val = is_numeric($val)?$val:sprintf("'%s'", $val);
 				}
 			}else{
 
@@ -324,45 +374,58 @@ abstract class Db{
 
 
 
-			array_push($update , sprintf("`%s`=%s", $fld, $val));
+			
+			array_push($update , sprintf("`%s`=:%s", $fld, $fld));
 			array_push($insert_names, "`".$fld."`");
-			array_push($insert_vals, sprintf("%s", $val));	
+			array_push($insert_names_placeholder, ":".$fld."");
+			$val_params[":" . $fld] = $val;
+			
+			//array_push($update , sprintf("`%s`=%s", $fld, $val));
+			//array_push($insert_vals, sprintf("%s", $val));	
+			//array_push($insert_vals, sprintf("%s", $db->quote($val)));	
 		}
 		
 		// decide whether we need an INSERT or an UPDATE, and build the SQL query.
 		if($this->id == 0){
 			$vals1 = implode(',', $insert_names );
-			$vals2 = implode(',', $insert_vals );
+			$vals1_placeholder = implode(',', $insert_names_placeholder );
+			//$vals2 = implode(',', $insert_vals );
 			
-			$sql = "INSERT INTO $this->table_name ($vals1) VALUES($vals2)";
+			$sql = "INSERT INTO $this->table_name ($vals1) VALUES($vals1_placeholder)";
 		}else {
 			$vals = implode(',', $update );
 			$sql = "UPDATE $this->table_name SET $vals";
 			$sql .= " WHERE {$this->fld_id}={$this->id}";
 		}
-
-
 		
+//d($sql);
+//d($val_params);
 		
-
-		if($this->execute($sql)){
+		//Set PDO error message
+		$db->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING );
+		//Use prepare statement to prevent injection and escape 
+		$stmt = $db->prepare($sql);
+		if($stmt->execute($val_params)){
+		//if($this->execute($sql)){
 
 				if($this->id == 0 )
 				{
-
-					$this->id = $this->getVar("SELECT LAST_INSERT_ID() as id ");
+					$this->id = $this->db->lastInsertId();
+					//$this->id = $this->getVar("SELECT LAST_INSERT_ID() as id ");
 				}
 
 				return true;
 		}else{
 
 			if ($emagid->debug){
-
+				//out put pdo error message
+				d($stmt->errorInfo());
 				dd($sql,$this->errors);
 			}
 			
 			return false;
 		}
+		
 		
 	}
 
@@ -391,6 +454,8 @@ abstract class Db{
 
 	  $db->query($sql);
 	}
+
+
 
 
 
@@ -447,23 +512,26 @@ abstract class Db{
 					if($relationship['relationship_type']=='many'){
 						$key = $relationship['remote']; 
 						
-						$obj = $obj->getList([
+						$found_obj = $obj->getList([
 								'where' => [
 									 $key => $local_val
 								] 
 							]);
 					}else{
 
-						$obj->getItem($local_val);
+						//$obj->getItem($local_val);
+						$found_obj = $obj->getItem($local_val);
 					}
 					
 
 
-					$this->data[$name] = $obj;
-					$this->{$name} = $obj;
-
-
-					return $obj; 
+					//$this->data[$name] = $obj;
+					//$this->{$name} = $obj;
+					//return $obj; 
+					
+					$this->data[$name] = $found_obj;
+					$this->{$name} = $found_obj;
+					return $found_obj;
 
 				}else { // creating a generic type 
 

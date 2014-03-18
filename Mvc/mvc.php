@@ -63,7 +63,8 @@ class Mvc{
 			[
 			'pattern'=>'{?controller}/{?action}/{?id}',
 			'controller' => 'home',
-			'action' => 'index'
+			'action' => 'index',
+			'route_type' => 'default'//This is for the qucik hack in line 166 to provide better structure url vars
 			]
 		]; 
 
@@ -111,7 +112,9 @@ class Mvc{
 			$uri = $uri_parts[0];
 
 			//$_SERVER['QUERY_STRING'] =$uri_parts[1];
-			self::rebuildQueryString($uri_parts[1]);
+			if($uri_parts[1] != ""){
+				self::rebuildQueryString($uri_parts[1]);
+			}
 
 		}
 
@@ -145,7 +148,7 @@ class Mvc{
 
 			if ($in_route){
 				$ok_routes[] = $in_route; 
-
+				
 			}	
 		}
 
@@ -155,13 +158,54 @@ class Mvc{
 		if ($route_found ) {
 			$route = $ok_routes[0];
 			
+			
 			self::$route = $route ;
 
  			$controller_name = $route['controller'] ;
 		 	$view_name = $route['action'];
 		 	$segments = $route;
-
-
+			
+			/* Change by ZY Chen
+			If default route is applied, get url params as key and val pairs. 
+			This is a quick hack for overwrite the base route controller/action/id.
+			To use this, add 'route_type' => 'default' to private static $base_routes at line 62
+			Now every things come after action would become var pairs.
+			Example: 
+			URL: mydomain.com/my_controller/my_action/last_name/chen/first_name/zy
+			Result: parms = [
+								'controller' => '{?controller}/{?action}/{?id}', //since this is just a quick hack, the base pattern remain the same
+								'controller' => 'my_controller',
+								'action' => 'my_action',
+								'route_type' => 'default',
+								'last_name' => 'chen',
+								'first_name' => 'zy',
+							];
+							
+		    Notes: in the url, controll and action is required event action is index	
+			*/
+			if(isset($route['route_type']) && $route['route_type'] == 'default'){
+				//d($route['route_type']);
+				if(isset($segments['id'])){unset($segments['id']);}//unset the base route's id var if it were set
+				$uri_segments = explode('/', $uri);
+				if(count($uri_segments)>2){
+					$c_name = array_shift($uri_segments);//trim the first var as controller name
+					$v_name = array_shift($uri_segments);//trim the second var as action name
+					$count_segments = count($uri_segments);
+					if($count_segments % 2 == 0){//check if there are all pairing vars
+						for($n = 0; $n<$count_segments; $n += 2){
+							$key_index = $n;
+							$val_indxe = $n + 1;
+							$segments[$uri_segments[$key_index]] = $uri_segments[$val_indxe];
+						}
+					}
+				}
+				//print_r($uri_segments);
+				//d($uri_segments);
+				//d($segments);
+			}
+			//close quick hack for default route
+			
+			
 		} else {
 
 
@@ -221,11 +265,17 @@ class Mvc{
 
 		if(method_exists($emagid->controller, $method)){ 
 			//call_user_func_array(array(&$emagid->controller, $method),$segments);
+			//d($method);
+			//dd($segments);
 			$emagid->controller->$method($segments);
 		}else if(method_exists($emagid->controller, $view_name)) {
+			//d($emagid->controller);
+			//d($view_name);
+			//d($segments);
 			$emagid->controller->$view_name($segments);
 			//call_user_func_array(array(&$emagid->controller, $view_name),$segments);
 		} else  {
+			//dd("no controller");
 			$emagid->controller->loadView();
 		}
 
