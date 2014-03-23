@@ -26,7 +26,7 @@ class Mvc{
 	/**
 	* @var string site's root, used to determine where the controller starts 
 	*/
-	private static $root = '/'; 
+	public static $root = '/'; 
 
 
 	private static $uri = ''; 
@@ -295,6 +295,49 @@ class Mvc{
 		}
 
 		return $mvc_parts;
+	}
+
+
+	/**
+	* Analyze a part of an MVC pattern
+	* @param string $part - an MVC part 
+	* @return object - Object representing the analysis. 
+	* 					- name     string - name of element 
+	* 					- required bool   - whether the param is mandatory 
+	* 					- value    string - applies to static parts, will contain the value .
+	* 					- static   bool   - indicates if the param is a variable or a static part ..
+	* @todo  : add support for more complex patterns, especially ones that support Models .
+	*/ 
+	public static function analyzePatternPart($part){
+		$output_array = [] ;
+
+		$regex = "/{([^}]+)}/";
+
+		$output = (object) [
+				'name'     => $part,
+				'required' => false,
+				'static'   => false,
+				'value'    => null 
+				
+			] ; 
+
+		preg_match($regex, $part, $output_array);
+
+		if (count($output_array)){
+			$part = $output_array[1];
+
+			$output->required = !startsWith($part,'?');
+			$output->name = str_replace("?", "", $part);
+		}else {
+			$output->value = $part; 
+			$output->static= true;
+		}
+
+		return $output; 
+
+		
+
+
 	}
 
 
