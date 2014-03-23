@@ -57,9 +57,9 @@ class Mvc{
 	*				- pattern : using regular expression
 	*				- controller
 	*				- action	*/
-	private static $routes = []; 
+	public static $routes = []; 
 
-	private static $base_routes = [
+	public static $base_routes = [
 			[
 			'pattern'=>'{?controller}/{?action}/{?id}',
 			'controller' => 'home',
