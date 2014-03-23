@@ -1,4 +1,4 @@
-# SkyPHP .htaccess
+# EmagidPHP .htaccess
 # Every website must have this file in its root web folder
 
 Options +FollowSymlinks
@@ -18,5 +18,5 @@ RewriteRule ^favicon\.ico - [L]
 # Also, we are blocking php files that are in the pages folder from being accessed directly
 RewriteCond %{REQUEST_FILENAME} !-f [OR]
 RewriteCond %{REQUEST_FILENAME} /pages/(.*)\.php$
-RewriteRule ^(.+)$ /coolcities/index.php/$1 [L]
+RewriteRule ^(.+)$ /<site name>/index.php/$1 [L]
 
