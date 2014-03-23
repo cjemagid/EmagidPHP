@@ -81,6 +81,26 @@ class Controller{
 		}
 	}
 
+
+
+	/** 
+	* Returns an Html renderable object 
+	*/ 
+	public function view(){
+		$html = new \Emagid\Mvc\Views\Html(func_get_args());
+
+		return $html;
+	}
+
+	/** 
+	* Returns an Html renderable object 
+	*/ 
+	public function json(){
+		$json = new \Emagid\Mvc\Views\Json(func_get_args());
+
+		return $json;
+	}
+
 }
 
 ?>

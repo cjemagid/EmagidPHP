@@ -221,13 +221,18 @@ class Mvc{
 
 		if(method_exists($emagid->controller, $method)){ 
 			//call_user_func_array(array(&$emagid->controller, $method),$segments);
-			$emagid->controller->$method($segments);
+			$renderable = $emagid->controller->$method($segments);
 		}else if(method_exists($emagid->controller, $view_name)) {
-			$emagid->controller->$view_name($segments);
+			$renderable = $emagid->controller->$view_name($segments);
 			//call_user_func_array(array(&$emagid->controller, $view_name),$segments);
 		} else  {
 			$emagid->controller->loadView();
 		}
+
+		if (is_subclass_of ($renderable, "\Emagid\Mvc\Renderable")){
+			$renderable->_render();
+		}
+		
 
 
 
