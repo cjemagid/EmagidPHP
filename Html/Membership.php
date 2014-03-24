@@ -104,6 +104,38 @@ class Membership {
 	}
 
 
+	/**
+	* Imported from Radon
+	*  @author Norman Ovenseri <novenseri@gmail.com>
+ 	*  @copyright eMagid 2014
+   * Generates a password with a salt (uses default salt generation function if no salt provided)
+   * using the chosen algo (sha256 default)
+   * @param string $password
+   * @param string $salt
+   * @param string $algo
+   * @return array Newly generated password with salt
+   */
+  public static function hash($password, $salt = null, $algo = null)
+  {
+    $algo = ($algo != null) ? $algo : 'sha256';
+    $salt = ($salt != null) ? $salt : self::_generateSalt();
+    
+    return ['password' => hash_hmac($algo, $password, $salt), 'salt' => $salt];
+  }
+  
+  /**
+  * Imported from Radon
+	*  @author Norman Ovenseri <novenseri@gmail.com>
+ 	*  @copyright eMagid 2014
+   * Generates a salt for passwords generation
+   * @return string salt for password
+   */
+  protected static function _generateSalt()
+  {
+    return md5(time());
+  }
+
+
 }
 
 ?>
